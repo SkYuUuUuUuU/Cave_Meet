@@ -1,0 +1,10 @@
+name: CaveMeetGame
+version: '1.0'
+main: com.example.cavemeetgame.CaveMeetGame
+api-version: '1.21'
+description: A cooperative survival game in a cave.
+commands:
+  meet:
+    description: CaveMeetGameの管理コマンド
+    permission: cavemeetgame.admin
+    usage: /meet [start|stop|leader|reload|monster]
