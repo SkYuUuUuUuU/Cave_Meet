@@ -1,0 +1,47 @@
+name: Build Minecraft Plugin
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Unzip project files
+      run: |
+        # アップロードされたZIPファイルをその場で解凍します
+        unzip -o *.zip
+        
+        # もし二重フォルダ（CaveMeetGame_Fixed/src...など）になっていても
+        # 自動で正しい位置（ルート）に中身を引っ張り出す魔法のコマンドです
+        if [ -d src ]; then
+          echo "Root structure detected."
+        else
+          nested_dir=$(find . -maxdepth 2 -type d -name "src" | head -n 1 | sed 's/\/src//')
+          if [ ! -z "$nested_dir" ]; then
+            echo "Moving files from nested directory: $nested_dir"
+            mv "$nested_dir"/* . 2>/dev/null || true
+            mv "$nested_dir"/.* . 2>/dev/null || true
+          fi
+        fi
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Build with Maven
+      run: mvn clean package
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: CaveMeetGame-Plugin
+        path: target/*.jar
